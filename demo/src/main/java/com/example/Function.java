@@ -1,5 +1,7 @@
 package com.example;
 
+import java.util.*;
+
 class Function {
     private final List<String> parameters;
     private final Expression body;
