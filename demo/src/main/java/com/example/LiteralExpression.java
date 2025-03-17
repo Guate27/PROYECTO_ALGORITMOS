@@ -1,3 +1,5 @@
+package com.example;
+
 class LiteralExpression implements Expression {
     private final Object value;
     

@@ -1,3 +1,5 @@
+package com.example;
+
 class Environment {
     private final Map<String, Object> variables;
     private final Map<String, Function> functions;

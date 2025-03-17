@@ -1,3 +1,5 @@
+package com.example;
+
 class SymbolExpression implements Expression {
     private final String name;
     

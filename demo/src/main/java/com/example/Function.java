@@ -1,3 +1,5 @@
+package com.example;
+
 class Function {
     private final List<String> parameters;
     private final Expression body;

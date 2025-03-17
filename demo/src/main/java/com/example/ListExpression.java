@@ -1,4 +1,6 @@
- class ListExpression implements Expression {
+package com.example;
+
+class ListExpression implements Expression {
     private final List<Expression> elements;
     
     public ListExpression(List<Expression> elements) {
