@@ -1,4 +1,6 @@
-Clase principal: 
+package com.example;
+
+import java.util.Scanner;
 public class LispInterpreter {
     private final Environment globalEnv;
     private final LispParser parser;
