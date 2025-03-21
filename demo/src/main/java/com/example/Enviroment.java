@@ -2,7 +2,7 @@ package com.example;
 
 import java.util.*;
 import java.io.*;
-
+    
 class Environment {
     private final Map<String, Object> variables;
     private final Map<String, Function> functions;
