@@ -1,7 +1,6 @@
 package com.example;
 
 import java.util.*;
-import java.io.*;
 
 class ListExpression implements Expression {
     private final List<Expression> elements;

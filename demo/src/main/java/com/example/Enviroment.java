@@ -2,7 +2,6 @@ package com.example;
 
 import java.util.*;
 import java.beans.Expression;
-import java.io.*;
     
 class Environment {
     private final Map<String, Object> variables;
@@ -26,8 +25,8 @@ class Environment {
         //aritméticos
         operators.put("+", (args, env) -> {
             int sum = 0;
-            for (Expression arg : args) {
-                sum += Integer.parseInt(arg.evaluate(env).toString());
+            for (com.example.Expression arg : args) {
+                sum += Integer.parseInt(((com.example.Expression) arg).evaluate(env).toString());
             }
             return sum;
         });
@@ -45,8 +44,8 @@ class Environment {
         
         operators.put("*", (args, env) -> {
             int product = 1;
-            for (Expression arg : args) {
-                product *= Integer.parseInt(arg.evaluate(env).toString());
+            for (com.example.Expression arg : args) {
+                product *= Integer.parseInt(((com.example.Expression) arg).evaluate(env).toString());
             }
             return product;
         });
@@ -88,7 +87,7 @@ class Environment {
         
         operators.put("list", (args, env) -> {
             List<Object> result = new ArrayList<>();
-            for (Expression arg : args) {
+            for (com.example.Expression arg : args) {
                 result.add(arg.evaluate(env));
             }
             return result;
@@ -117,15 +116,15 @@ class Environment {
             }
             
             List<String> params = new ArrayList<>();
-            for (Expression param : ((ListExpression) args.get(1)).getElements()) {
+            for (com.example.Expression param : ((ListExpression) args.get(1)).getElements()) {
                 if (!(param instanceof SymbolExpression)) {
                     throw new RuntimeException("Los parámetros deben ser símbolos");
                 }
                 params.add(((SymbolExpression) param).getName());
             }
             
-            Expression body = args.get(2);
-            Function function = new Function(params, body);
+            Expression body = (Expression) args.get(2);
+            Function function = new Function(params, (com.example.Expression) body);
             env.defineFunction(funcName, function);
             
             return "Función definida: " + funcName;
@@ -179,7 +178,7 @@ class Environment {
         functions.put(name, function);
     }
     
-    public Object callFunction(String name, List<Expression> args, Environment callerEnv) {
+    public Object callFunction(String name, List<com.example.Expression> args, Environment callerEnv) {
         Function function;
         if (functions.containsKey(name)) {
             function = functions.get(name);
@@ -194,7 +193,7 @@ class Environment {
         
         if (params.size() != args.size()) {
             throw new RuntimeException("Número incorrecto de argumentos para " + name);
-        }
+        }                
         
         for (int i = 0; i < params.size(); i++) {
             functionEnv.setVariable(params.get(i), args.get(i).evaluate(callerEnv));

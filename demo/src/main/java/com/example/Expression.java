@@ -1,5 +1,5 @@
 package com.example;
 
-public interface Expression {
-
+interface Expression {
+    Object evaluate(Environment env);
 }
