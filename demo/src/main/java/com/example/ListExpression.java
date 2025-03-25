@@ -8,28 +8,28 @@ class ListExpression implements Expression {
     public ListExpression(List<Expression> elements) {
         this.elements = elements;
     }
-    
+
     @Override
     public Object evaluate(Environment env) {
         if (elements.isEmpty()) {
             return Collections.emptyList();
         }
-        
+
         Expression first = elements.get(0);
-        
+
         if (first instanceof SymbolExpression) {
             String operator = ((SymbolExpression) first).getName();
-            
+
             OperatorStrategy strategy = env.getOperator(operator);
             if (strategy != null) {
                 return strategy.execute(elements.subList(1, elements.size()), env);
             }
-            
+
             if (env.isFunction(operator)) {
                 return env.callFunction(operator, elements.subList(1, elements.size()), env);
             }
         }
-        
+
         List<Object> results = new ArrayList<>();
         for (Expression expr : elements) {
             results.add(expr.evaluate(env));

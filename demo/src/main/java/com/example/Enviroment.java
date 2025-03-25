@@ -1,7 +1,6 @@
 package com.example;
 
 import java.util.*;
-import java.beans.Expression;
     
 class Environment {
     private final Map<String, Object> variables;
@@ -26,18 +25,30 @@ class Environment {
         operators.put("+", (args, env) -> {
             int sum = 0;
             for (com.example.Expression arg : args) {
-                sum += Integer.parseInt(((com.example.Expression) arg).evaluate(env).toString());
+                Object value = arg.evaluate(env);
+                if (!(value instanceof Integer)) {
+                    throw new RuntimeException("El operador '+' solo acepta números. Argumento inválido: " + value);
+                }
+                sum += (Integer) value;
             }
             return sum;
         });
         
         operators.put("-", (args, env) -> {
-            if (args.size() == 1) {
-                return -Integer.parseInt(args.get(0).evaluate(env).toString());
+            if (args.isEmpty()) {
+                throw new RuntimeException("El operador '-' requiere al menos un argumento.");
             }
-            int result = Integer.parseInt(args.get(0).evaluate(env).toString());
+            Object firstValue = args.get(0).evaluate(env);
+            if (!(firstValue instanceof Integer)) {
+                throw new RuntimeException("El operador '-' solo acepta números. Argumento inválido: " + firstValue);
+            }
+            int result = (Integer) firstValue;
             for (int i = 1; i < args.size(); i++) {
-                result -= Integer.parseInt(args.get(i).evaluate(env).toString());
+                Object value = args.get(i).evaluate(env);
+                if (!(value instanceof Integer)) {
+                    throw new RuntimeException("El operador '-' solo acepta números. Argumento inválido: " + value);
+                }
+                result -= (Integer) value;
             }
             return result;
         });
@@ -45,15 +56,33 @@ class Environment {
         operators.put("*", (args, env) -> {
             int product = 1;
             for (com.example.Expression arg : args) {
-                product *= Integer.parseInt(((com.example.Expression) arg).evaluate(env).toString());
+                Object value = arg.evaluate(env);
+                if (!(value instanceof Integer)) {
+                    throw new RuntimeException("El operador '*' solo acepta números. Argumento inválido: " + value);
+                }
+                product *= (Integer) value;
             }
             return product;
         });
         
         operators.put("/", (args, env) -> {
-            int result = Integer.parseInt(args.get(0).evaluate(env).toString());
+            if (args.isEmpty()) {
+                throw new RuntimeException("El operador '/' requiere al menos un argumento.");
+            }
+            Object firstValue = args.get(0).evaluate(env);
+            if (!(firstValue instanceof Integer)) {
+                throw new RuntimeException("El operador '/' solo acepta números. Argumento inválido: " + firstValue);
+            }
+            int result = (Integer) firstValue;
             for (int i = 1; i < args.size(); i++) {
-                result /= Integer.parseInt(args.get(i).evaluate(env).toString());
+                Object value = args.get(i).evaluate(env);
+                if (!(value instanceof Integer)) {
+                    throw new RuntimeException("El operador '/' solo acepta números. Argumento inválido: " + value);
+                }
+                if ((Integer) value == 0) {
+                    throw new RuntimeException("División por cero.");
+                }
+                result /= (Integer) value;
             }
             return result;
         });
@@ -116,15 +145,19 @@ class Environment {
             }
             
             List<String> params = new ArrayList<>();
-            for (com.example.Expression param : ((ListExpression) args.get(1)).getElements()) {
+            for (Expression param : ((ListExpression) args.get(1)).getElements()) {
                 if (!(param instanceof SymbolExpression)) {
                     throw new RuntimeException("Los parámetros deben ser símbolos");
                 }
                 params.add(((SymbolExpression) param).getName());
             }
             
-            Expression body = (Expression) args.get(2);
-            Function function = new Function(params, (com.example.Expression) body);
+            if (!(args.get(2) instanceof Expression)) {
+                throw new RuntimeException("El cuerpo de la función debe ser una expresión válida");
+            }
+            
+            Expression body = args.get(2); // Se utiliza la interfaz Expression del proyecto
+            Function function = new Function(params, body); // Constructor corregido
             env.defineFunction(funcName, function);
             
             return "Función definida: " + funcName;
@@ -145,6 +178,24 @@ class Environment {
                 }
             }
             return null;
+        });
+
+        operators.put("trace", (args, env) -> {
+            if (args.size() != 1 || !(args.get(0) instanceof SymbolExpression)) {
+                throw new RuntimeException("trace requiere un símbolo como argumento");
+            }
+            String funcName = ((SymbolExpression) args.get(0)).getName();
+            if (!env.isFunction(funcName)) {
+                throw new RuntimeException("Función no definida: " + funcName);
+            }
+            Function originalFunction = (Function) env.functions.get(funcName);
+            env.functions.put(funcName, new Function(originalFunction.getParameters(), (innerEnv) -> {
+                System.out.println("Llamando a " + funcName + " con argumentos: " + innerEnv.variables);
+                Object result = originalFunction.getBody().evaluate(innerEnv);
+                System.out.println("Resultado de " + funcName + ": " + result);
+                return result;
+            }));
+            return "Función " + funcName + " trazada";
         });
     }
     
